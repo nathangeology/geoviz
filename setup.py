@@ -17,7 +17,8 @@ setup(name='geoviz',
                         'joblib',
                         'scikit-image',
                         'lasio',
-                        'segyio'
+                        'segyio',
+                        'altair'
                         ],
       zip_safe=True,
       test_suite='nose.collector',
