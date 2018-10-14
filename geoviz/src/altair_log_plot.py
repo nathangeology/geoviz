@@ -63,21 +63,12 @@ class AltAirLogPlot(object):
     def plot_GR_SP(self, brush, GR_str='GR', SP_str='SP')->alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        color_scale = alt.Scale(domain=[GR_str, SP_str, 'DPHI', 'PHIS', 'NPHI', 'RDEP', 'RMED', 'RSHA'],
-                                range=['rgb(255,0,0)',
-                                       'rgb(0,0,0)',
-                                       'rgb(0,0,255)',
-                                       'rgb(0,255,255)',
-                                       'rgb(0,0,0)',
-                                       'rgb(0,0,255)',
-                                       'rgb(255,0,0)',
-                                       'rgb(0,0,255)'])
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref()}),
+            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
-            color=alt.Color('variable', scale=color_scale)
+            color='variable'
         ).properties(
             width=100,
             height=600
@@ -87,15 +78,14 @@ class AltAirLogPlot(object):
     def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-
-        chart = alt.Chart(df).mark_area().encode(
+        chart = alt.Chart(df).mark_area(align="left").encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending'),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         ).add_selection(brush)
         return chart
@@ -105,8 +95,6 @@ class AltAirLogPlot(object):
                        neutron_str='NPHI',
                        sonic_str='DTC',
                        lithology_dens=2.65)->alt.Chart:
-        color_scale = alt.Scale(domain=[density_str, neutron_str, sonic_str],
-                                range=['rgb(255,0,0)', 'rgb(0,0,255)'])
         df = self._handle_log_names(self.df, log_names=[density_str, neutron_str, sonic_str])
         df['DPHI'] = (df[density_str] - lithology_dens)/(1-lithology_dens)
         df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
@@ -114,7 +102,7 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref()}),
+            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
@@ -129,12 +117,12 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', scale={'type': 'log'}),
-            y=alt.Y('DEPT', scale={'domain': brush.ref()}, sort='descending', axis=None),
+            y=alt.Y('DEPT', scale={'domain': brush.ref(), 'zero': True}, sort='descending', axis=None),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
-            width=200,
+            width=100,
             height=600
         )
         return chart
