@@ -53,14 +53,32 @@ class AltAirLogPlot(object):
     @classmethod
     def plot_quad_combo_tracks(cls, df):
         class_instance = cls(df)
-        GR_SP_track = class_instance.plot_GR_SP()
-        porosity_track = class_instance._plot_porosity()
-        return GR_SP_track | porosity_track
+        brush = alt.selection(type='interval', encodings=['y'])
+        selector_track = class_instance.plot_GR_SP_selection_chart(brush)
+        GR_SP_track = class_instance.plot_GR_SP(brush)
+        porosity_track = class_instance._plot_porosity(brush)
+        resistivity_track = class_instance.plot_resistivity_track(brush)
+        return selector_track | GR_SP_track | resistivity_track | porosity_track
 
-    def plot_GR_SP(self, GR_str='GR', SP_str='SP')->alt.Chart:
+    def plot_GR_SP(self, brush, GR_str='GR', SP_str='SP')->alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_line().encode(
+        chart = alt.Chart(df).mark_area().encode(
+            x=alt.X('value'),
+            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref()}),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            color='variable'
+        ).properties(
+            width=50,
+            height=600
+        )
+        return chart
+
+    def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
+        df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
+        df = self._melt_df(df)
+        chart = alt.Chart(df).mark_area(align="left").encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending'),
             tooltip=['DEPT', 'value'],
@@ -69,10 +87,10 @@ class AltAirLogPlot(object):
         ).properties(
             width=50,
             height=600
-        ).interactive(bind_x=False)
+        ).add_selection(brush)
         return chart
 
-    def _plot_porosity(self,
+    def _plot_porosity(self, brush,
                        density_str='RHOB',
                        neutron_str='NPHI',
                        sonic_str='DTC',
@@ -82,16 +100,31 @@ class AltAirLogPlot(object):
         df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
         df = self._handle_log_names(df, log_names=['NPHI', 'DPHI', 'PHIS'])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_line().encode(
+        chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', axis=None),
+            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref()}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
             width=50,
             height=600
-        ).interactive(bind_x=False)
+        )
+        return chart
+
+    def plot_resistivity_track(self, brush, deep_res_str='RDEP', med_res_str='RMED', shallow_res_str='RSHA'):
+        df = self._handle_log_names(self.df, log_names=[deep_res_str, med_res_str, shallow_res_str])
+        df = self._melt_df(df)
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('value', scale={'type': 'log'}),
+            y=alt.Y('DEPT', scale={'domain': brush.ref()}, sort='descending', axis=None),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            color='variable'
+        ).properties(
+            width=50,
+            height=600
+        )
         return chart
 
     @staticmethod
