@@ -80,9 +80,16 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
 
         color_scale = alt.Scale(
-            domain=['SP', 'GR'],
-            range=['rgb(162,160,152)', 'rgb(194,81,64)', 'rgb(255,0,0)',
-                   'rgb(0,255,0)', 'rgb(0,0,255)', 'rgb(0,125,125)', 'rgb(125,125,0)', 'rgb(125,0,125)']
+            domain=['SP', 'GR', 'RDEP', 'RMED', 'RSHA', 'RHOB', 'NPHI', 'DT', 'DTC'],
+            range=['#B71C1C',
+                   '#4A148C',
+                   '#1A237E',
+                   '#01579B',
+                   '#004D40',
+                   '#33691E',
+                   '#F57F17',
+                   '#E65100',
+                   '#3E2723']
         )
 
         chart = alt.Chart(df).mark_line().encode(
