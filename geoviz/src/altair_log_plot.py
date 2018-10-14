@@ -63,9 +63,11 @@ class AltAirLogPlot(object):
     def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_line(align="left").encode(
+        chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', axis=alt.Axis(title='Selector')),
             y=alt.Y('DEPT', sort='descending'),
+            # x=alt.X('value:Q', axis=alt.Axis(title='Selector')),
+            # y=alt.Y('DEPT:O', sort='ascending'),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
@@ -95,6 +97,8 @@ class AltAirLogPlot(object):
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', axis=alt.Axis(title='SP GR')),
             y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}),
+            # x=alt.X('value:Q', axis=alt.Axis(title='SP GR')),
+            # y=alt.Y('DEPT:O', sort='ascending', scale={'domain': brush.ref(), 'zero': True}),
             color=alt.Color('variable:N', legend=None, scale=color_scale),
             tooltip=['DEPT', 'value'],
             order='DEPT',
@@ -110,7 +114,9 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', axis=alt.Axis(title='Resistivity'), scale={'type': 'log'}),
-            y=alt.Y('DEPT', scale={'domain': brush.ref(), 'zero': True}, sort='descending', axis=None),
+            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}, axis=None),
+            # x=alt.X('value:Q', axis=alt.Axis(title='Resistivity'), scale={'type': 'log'}),
+            # y=alt.Y('DEPT:O', sort='ascending', scale={'domain': brush.ref(), 'zero': True}, axis=None),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable',
@@ -130,6 +136,8 @@ class AltAirLogPlot(object):
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', axis=alt.Axis(title='Porosity')),
             y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
+            # x=alt.X('value:Q', axis=alt.Axis(title='Porosity')),
+            # y=alt.Y('DEPT:O', sort='ascending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable',
