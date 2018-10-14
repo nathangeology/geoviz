@@ -18,7 +18,8 @@ setup(name='geoviz',
                         'scikit-image',
                         'lasio',
                         'segyio',
-                        'altair'
+                        'altair',
+                        'pyshp'
                         ],
       zip_safe=True,
       test_suite='nose.collector',
