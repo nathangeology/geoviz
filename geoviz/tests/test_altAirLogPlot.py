@@ -23,7 +23,3 @@ class TestAltAirLogPlot(TestCase):
         chart.serve()
         print('here')
 
-    def test_plot_multi_logsv2(self):
-        chart = AltAirLogPlot.multi_log_plot_version(self.test_data, ['GR', 'NPHI', 'RHOB'])
-        chart.serve()
-        print('here')

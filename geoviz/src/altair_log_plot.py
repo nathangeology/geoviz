@@ -21,23 +21,19 @@ class AltAirLogPlot(object):
     @classmethod
     def plot_multi_logs(cls, df, log_names=None):
         df = cls.handle_log_names(df, log_names)
-        plot_list = [x for x in df.columns if x is not 'DEPT']
         df.sort_values(by=['DEPT'], inplace=True, ascending=True)
+        df = cls.melt_df(df)
         chart = alt.Chart(df).mark_line().encode(
-            alt.X(alt.repeat("column"), type='quantitative'),
-            alt.Y('DEPT', sort='descending', axis=alt.Axis(domain=False,
-                                                           orient='left',
-                                                           offset=0,
-                                                           position=0
-                                                           ), type='quantitative'),
-            order='DEPT'
+            x=alt.X('value'),
+            y=alt.Y('DEPT', sort='descending'),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            column='variable',
+            color='variable'
         ).properties(
             width=50,
             height=600
-        ).repeat(
-            column=plot_list
         ).interactive(bind_x=False)
-
 
         return chart
 
@@ -63,6 +59,11 @@ class AltAirLogPlot(object):
         ).interactive(bind_x=False)
         chart = alt.hconcat(chart1, chart2)
         return chart
+
+    @classmethod
+    def melt_df(cls, df):
+        return df.melt(id_vars=['DEPT'])
+
 
     @classmethod
     def handle_log_names(cls, df, log_names=None):
