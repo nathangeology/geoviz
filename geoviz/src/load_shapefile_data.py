@@ -1,22 +1,14 @@
 import pandas as pd
 import shapefile
 from collections import defaultdict
-
+from osgeo import ogr, osr
+import geopandas as gpd
 
 class LoadShpData(object):
     @classmethod
     def get_data(cls, filename):
-        sf = shapefile.Reader(filename)
-        outputdict = defaultdict(list)
-        fields = sf.fields
-        for idx, shape in enumerate(list(sf.iterShapes())):
-            points = shape.points
-            points = points[0]
-            outputdict['X'].append(points[0])
-            outputdict['Y'].append(points[1])
-            records = sf.record(idx)
-            for idx2, record in enumerate(records):
-                field_name = fields[idx2][0]
-                outputdict[field_name].append(record)
-
-        return pd.DataFrame(outputdict)
+        data = gpd.read_file(filename)
+        data = data.to_crs(epsg=4326)
+        data['X'] = data['geometry'].x
+        data['Y'] = data['geometry'].y
+        return data

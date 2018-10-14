@@ -1,3 +1,4 @@
 from load_las_data import LoadLasData
 from altair_log_plot import AltAirLogPlot
 from load_shapefile_data import LoadShpData
+from alitair_well_location_map import WellLocationMap
