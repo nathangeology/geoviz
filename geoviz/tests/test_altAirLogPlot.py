@@ -18,8 +18,15 @@ class TestAltAirLogPlot(TestCase):
         chart = AltAirLogPlot.plot_multi_logs(self.test_data)
         chart.serve()
         print('here')
+
     def test_plot_multi_logs(self):
         chart = AltAirLogPlot.plot_multi_logs(self.test_data, ['GR', 'NPHI', 'RHOB'])
         chart.serve()
         print('here')
+
+    def test_plot_quad_combo(self):
+        chart = AltAirLogPlot.plot_quad_combo_tracks(self.test_data)
+        chart.serve()
+        print('here')
+
 

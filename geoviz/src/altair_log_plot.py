@@ -3,6 +3,15 @@ import pandas as pd
 
 
 class AltAirLogPlot(object):
+    df = None
+
+    DTCSH = 70
+    DTCMA = 55.8
+    DTCW = 200
+    #PHIS = (DTC - DTCMA) / (DTCW - DTCMA) / KCP
+    def __init__(self, df):
+        self.df = df
+
     @classmethod
     def plot_log_df(cls, df):
         chart = alt.Chart(df).mark_line(interpolate='basis', orient='vertical').encode(
@@ -20,9 +29,13 @@ class AltAirLogPlot(object):
 
     @classmethod
     def plot_multi_logs(cls, df, log_names=None):
-        df = cls.handle_log_names(df, log_names)
+        class_instance = cls(df)
+        df = class_instance._handle_log_names(df, log_names)
         df.sort_values(by=['DEPT'], inplace=True, ascending=True)
-        df = cls.melt_df(df)
+        df_unscaled = df.copy()
+        df = class_instance._scale_data_for_plotting(df)
+        df = class_instance._melt_df(df)
+
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending'),
@@ -38,35 +51,66 @@ class AltAirLogPlot(object):
         return chart
 
     @classmethod
-    def multi_log_plot_version(cls, df, log_names=None):
-        df = cls.handle_log_names(df, log_names)
-        plot_list = [x for x in df.columns if x is not 'DEPT']
-        chart1 = alt.Chart(df).mark_line().encode(
-            alt.X(plot_list[0], type='quantitative'),
-            alt.Y('DEPT', sort='descending', type='quantitative'),
-            order='DEPT'
+    def plot_quad_combo_tracks(cls, df):
+        class_instance = cls(df)
+        GR_SP_track = class_instance.plot_GR_SP()
+        porosity_track = class_instance._plot_porosity()
+        return GR_SP_track | porosity_track
+
+    def plot_GR_SP(self, GR_str='GR', SP_str='SP')->alt.Chart:
+        df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
+        df = self._melt_df(df)
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('value'),
+            y=alt.Y('DEPT', sort='descending'),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            color='variable'
         ).properties(
             width=50,
             height=600
         ).interactive(bind_x=False)
-        chart2 = alt.Chart(df).mark_line().encode(
-            alt.X(plot_list[1], type='quantitative'),
-            alt.Y('DEPT', sort='descending', axis=None, type='quantitative'),
-            order='DEPT'
-        ).properties(
-            width=50,
-            height=600
-        ).interactive(bind_x=False)
-        chart = alt.hconcat(chart1, chart2)
         return chart
 
-    @classmethod
-    def melt_df(cls, df):
+    def _plot_porosity(self,
+                       density_str='RHOB',
+                       neutron_str='NPHI',
+                       sonic_str='DTC',
+                       lithology_dens=2.65)->alt.Chart:
+        df = self._handle_log_names(self.df, log_names=[density_str, neutron_str, sonic_str])
+        df['DPHI'] = (df[density_str] - lithology_dens)/(1-lithology_dens)
+        df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
+        df = self._handle_log_names(df, log_names=['NPHI', 'DPHI', 'PHIS'])
+        df = self._melt_df(df)
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('value'),
+            y=alt.Y('DEPT', sort='descending', axis=None),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            color='variable'
+        ).properties(
+            width=50,
+            height=600
+        ).interactive(bind_x=False)
+        return chart
+
+    @staticmethod
+    def _scale_data_for_plotting(df):
+        for col in df:
+            if col == 'DEPT':
+                continue
+            series = df[col]
+            series = series / series.max()
+            df[col] = series
+        return df
+
+    @staticmethod
+    def _melt_df(df):
         return df.melt(id_vars=['DEPT'])
 
 
-    @classmethod
-    def handle_log_names(cls, df, log_names=None):
+    @staticmethod
+    def _handle_log_names(df, log_names=None):
         if log_names is not None:
             dept = df['DEPT']
             df = df[log_names]
