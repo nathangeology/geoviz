@@ -70,7 +70,7 @@ class AltAirLogPlot(object):
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         )
         return chart
@@ -78,7 +78,7 @@ class AltAirLogPlot(object):
     def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_area(align="left").encode(
+        chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending'),
             tooltip=['DEPT', 'value'],
@@ -107,7 +107,7 @@ class AltAirLogPlot(object):
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         )
         return chart
@@ -122,7 +122,7 @@ class AltAirLogPlot(object):
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=200,
             height=600
         )
         return chart
