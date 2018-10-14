@@ -56,30 +56,15 @@ class AltAirLogPlot(object):
         brush = alt.selection(type='interval', encodings=['y'])
         selector_track = class_instance.plot_GR_SP_selection_chart(brush)
         GR_SP_track = class_instance.plot_GR_SP(brush)
-        porosity_track = class_instance._plot_porosity(brush)
+        porosity_track = class_instance.plot_porosity(brush)
         resistivity_track = class_instance.plot_resistivity_track(brush)
         return selector_track | GR_SP_track | resistivity_track | porosity_track
-
-    def plot_GR_SP(self, brush, GR_str='GR', SP_str='SP')->alt.Chart:
-        df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
-        df = self._melt_df(df)
-        chart = alt.Chart(df).mark_area().encode(
-            x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}),
-            tooltip=['DEPT', 'value'],
-            order='DEPT',
-            color='variable'
-        ).properties(
-            width=100,
-            height=600
-        )
-        return chart
 
     def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_area(align="left").encode(
-            x=alt.X('value'),
+        chart = alt.Chart(df).mark_line(align="left").encode(
+            x=alt.X('value', axis=alt.Axis(title='Selector')),
             y=alt.Y('DEPT', sort='descending'),
             tooltip=['DEPT', 'value'],
             order='DEPT',
@@ -90,37 +75,65 @@ class AltAirLogPlot(object):
         ).add_selection(brush)
         return chart
 
-    def _plot_porosity(self, brush,
-                       density_str='RHOB',
-                       neutron_str='NPHI',
-                       sonic_str='DTC',
-                       lithology_dens=2.65)->alt.Chart:
-        df = self._handle_log_names(self.df, log_names=[density_str, neutron_str, sonic_str])
-        df['DPHI'] = (df[density_str] - lithology_dens)/(1-lithology_dens)
-        df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
-        df = self._handle_log_names(df, log_names=['NPHI', 'DPHI', 'PHIS'])
+    def plot_GR_SP(self, brush, GR_str='GR', SP_str='SP')->alt.Chart:
+        df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
-        chart = alt.Chart(df).mark_area().encode(
-            x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
+
+        color_scale = alt.Scale(
+            domain=['SP', 'GR', 'RDEP', 'RMED', 'RSHA', 'RHOB', 'NPHI', 'DT', 'DTC'],
+            range=['#B71C1C',
+                   '#4A148C',
+                   '#1A237E',
+                   '#01579B',
+                   '#004D40',
+                   '#33691E',
+                   '#F57F17',
+                   '#E65100',
+                   '#3E2723']
+        )
+
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('value', axis=alt.Axis(title='SP GR')),
+            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}),
+            color=alt.Color('variable:N', legend=None, scale=color_scale),
             tooltip=['DEPT', 'value'],
             order='DEPT',
-            color='variable'
+            opacity=alt.OpacityValue(0.8)
         ).properties(
             width=100,
             height=600
         )
         return chart
 
-    def plot_resistivity_track(self, brush, deep_res_str='RDEP', med_res_str='RMED', shallow_res_str='RSHA'):
+    def plot_resistivity_track(self, brush, deep_res_str='RDEP', med_res_str='RMED', shallow_res_str='RSHA')->alt.Chart:
         df = self._handle_log_names(self.df, log_names=[deep_res_str, med_res_str, shallow_res_str])
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_line().encode(
-            x=alt.X('value', scale={'type': 'log'}),
+            x=alt.X('value', axis=alt.Axis(title='Resistivity'), scale={'type': 'log'}),
             y=alt.Y('DEPT', scale={'domain': brush.ref(), 'zero': True}, sort='descending', axis=None),
             tooltip=['DEPT', 'value'],
             order='DEPT',
-            color='variable'
+            color='variable',
+            opacity=alt.OpacityValue(0.8)
+        ).properties(
+            width=100,
+            height=600
+        )
+        return chart
+
+    def plot_porosity(self, brush, density_str='RHOB', neutron_str='NPHI', sonic_str='DTC', lithology_dens=2.65)->alt.Chart:
+        df = self._handle_log_names(self.df, log_names=[density_str, neutron_str, sonic_str])
+        df['DPHI'] = (df[density_str] - lithology_dens)/(1-lithology_dens)
+        df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
+        df = self._handle_log_names(df, log_names=['NPHI', 'DPHI', 'PHIS'])
+        df = self._melt_df(df)
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('value', axis=alt.Axis(title='Porosity')),
+            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
+            tooltip=['DEPT', 'value'],
+            order='DEPT',
+            color='variable',
+            opacity=alt.OpacityValue(0.8)
         ).properties(
             width=100,
             height=600
