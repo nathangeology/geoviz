@@ -1,7 +1,4 @@
-import pandas as pd
-import shapefile
-from collections import defaultdict
-from osgeo import ogr, osr
+
 import geopandas as gpd
 
 class LoadShpData(object):
