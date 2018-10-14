@@ -65,12 +65,12 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref()}),
+            y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref(), 'zero': True}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         )
         return chart
@@ -85,7 +85,7 @@ class AltAirLogPlot(object):
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         ).add_selection(brush)
         return chart
@@ -102,12 +102,12 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
-            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref()}),
+            y=alt.Y('DEPT', sort='descending', axis=None, scale={'domain': brush.ref(), 'zero': True}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         )
         return chart
@@ -117,12 +117,12 @@ class AltAirLogPlot(object):
         df = self._melt_df(df)
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X('value', scale={'type': 'log'}),
-            y=alt.Y('DEPT', scale={'domain': brush.ref()}, sort='descending', axis=None),
+            y=alt.Y('DEPT', scale={'domain': brush.ref(), 'zero': True}, sort='descending', axis=None),
             tooltip=['DEPT', 'value'],
             order='DEPT',
             color='variable'
         ).properties(
-            width=50,
+            width=100,
             height=600
         )
         return chart
