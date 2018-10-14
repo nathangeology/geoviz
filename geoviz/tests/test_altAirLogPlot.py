@@ -1,6 +1,6 @@
 from unittest import TestCase
-from geoviz.src.load_las_data import LoadLasData
-from geoviz.src.altair_log_plot import AltAirLogPlot
+from geoviz import LoadLasData
+from geoviz import AltAirLogPlot
 import pkg_resources
 
 
@@ -10,6 +10,20 @@ class TestAltAirLogPlot(TestCase):
         self.test_data = LoadLasData.get_data(self.filename)
 
     def test_plot_log_df(self):
-        AltAirLogPlot.plot_log_df(self.test_data)
+        chart = AltAirLogPlot.plot_log_df(self.test_data)
+        chart.serve()
+        print('here')
 
+    def test_plot_multi_logs(self):
+        chart = AltAirLogPlot.plot_multi_logs(self.test_data)
+        chart.serve()
+        print('here')
+    def test_plot_multi_logs(self):
+        chart = AltAirLogPlot.plot_multi_logs(self.test_data, ['GR', 'NPHI', 'RHOB'])
+        chart.serve()
+        print('here')
+
+    def test_plot_multi_logsv2(self):
+        chart = AltAirLogPlot.multi_log_plot_version(self.test_data, ['GR', 'NPHI', 'RHOB'])
+        chart.serve()
         print('here')
