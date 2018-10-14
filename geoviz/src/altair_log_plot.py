@@ -63,12 +63,21 @@ class AltAirLogPlot(object):
     def plot_GR_SP(self, brush, GR_str='GR', SP_str='SP')->alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
+        color_scale = alt.Scale(domain=[GR_str, SP_str, 'DPHI', 'PHIS', 'NPHI', 'RDEP', 'RMED', 'RSHA'],
+                                range=['rgb(255,0,0)',
+                                       'rgb(0,0,0)',
+                                       'rgb(0,0,255)',
+                                       'rgb(0,255,255)',
+                                       'rgb(0,0,0)',
+                                       'rgb(0,0,255)',
+                                       'rgb(255,0,0)',
+                                       'rgb(0,0,255)'])
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending', scale={'domain': brush.ref()}),
             tooltip=['DEPT', 'value'],
             order='DEPT',
-            color='variable'
+            color=alt.Color('variable', scale=color_scale)
         ).properties(
             width=100,
             height=600
@@ -78,6 +87,7 @@ class AltAirLogPlot(object):
     def plot_GR_SP_selection_chart(self, brush, GR_str='GR', SP_str='SP') -> alt.Chart:
         df = self._handle_log_names(self.df, log_names=[GR_str, SP_str])
         df = self._melt_df(df)
+
         chart = alt.Chart(df).mark_area().encode(
             x=alt.X('value'),
             y=alt.Y('DEPT', sort='descending'),
@@ -95,6 +105,8 @@ class AltAirLogPlot(object):
                        neutron_str='NPHI',
                        sonic_str='DTC',
                        lithology_dens=2.65)->alt.Chart:
+        color_scale = alt.Scale(domain=[density_str, neutron_str, sonic_str],
+                                range=['rgb(255,0,0)', 'rgb(0,0,255)'])
         df = self._handle_log_names(self.df, log_names=[density_str, neutron_str, sonic_str])
         df['DPHI'] = (df[density_str] - lithology_dens)/(1-lithology_dens)
         df['PHIS'] = (df[sonic_str] - self.DTCMA) / (self.DTCW - self.DTCMA)
